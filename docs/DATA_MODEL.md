@@ -4,116 +4,143 @@
 | Field | Type | Notes |
 |---|---|---|
 | id | uuid PK | |
-| user_id | uuid | owner scope (nullable v1) |
-| name | text unique not null | e.g. Supermarket |
+| user_id | uuid nullable | owner scope (v2) |
+| channel_code | text unique not null | e.g. CH-SUP |
+| channel_name | text not null | e.g. Supermarket |
 | created_at | timestamptz | |
 
 ## chains
 | Field | Type | Notes |
 |---|---|---|
 | id | uuid PK | |
-| user_id | uuid | |
-| channel_id | uuid FK → channels | |
+| user_id | uuid nullable | |
 | chain_code | text unique not null | |
-| name | text not null | |
+| chain_name | text not null | |
+| channel_id | uuid FK → channels | |
 | created_at | timestamptz | |
 
 ## stores
 | Field | Type | Notes |
 |---|---|---|
 | id | uuid PK | |
-| user_id | uuid | |
-| chain_id | uuid FK → chains | |
+| user_id | uuid nullable | |
 | store_code | text unique not null | authoritative key |
-| name | text not null | |
+| store_name | text not null | |
+| chain_id | uuid FK → chains | |
 | location | text | |
 | state | text | |
+| is_active | boolean default true | |
 | created_at | timestamptz | |
 
 ## products
 | Field | Type | Notes |
 |---|---|---|
 | id | uuid PK | |
-| user_id | uuid | |
+| user_id | uuid nullable | |
 | product_code | text unique not null | authoritative key |
-| name | text not null | |
+| product_name | text not null | |
 | brand | text | |
+| sku | text | |
+| is_active | boolean default true | |
 | created_at | timestamptz | |
 
 ## orders
 | Field | Type | Notes |
 |---|---|---|
 | id | uuid PK | |
-| user_id | uuid | |
+| user_id | uuid nullable | |
 | order_number | text | |
+| customer_reference | text | |
+| chain_id | uuid FK → chains | |
 | store_id | uuid FK → stores | |
+| order_date | date | |
 | created_at | timestamptz | |
 
 ## deliveries
 | Field | Type | Notes |
 |---|---|---|
 | id | uuid PK | |
-| user_id | uuid | |
-| delivery_ref | text not null | unique per delivery |
-| delivery_date | date not null | used for week/month calc |
-| delivery_month | int | computed on import |
-| delivery_year | int | computed on import |
-| reporting_week | int | 1–5, computed on import |
-| store_id | uuid FK → stores | |
+| user_id | uuid nullable | |
+| delivery_ref | text unique not null | |
+| delivery_date | date not null | |
+| delivery_month | integer not null | |
+| delivery_year | integer not null | |
+| reporting_week | integer 1–5 not null | derived on import |
 | order_id | uuid FK → orders nullable | |
-| status | text | completed/partial/cancelled |
+| chain_id | uuid FK → chains | |
+| store_id | uuid FK → stores | |
+| channel_id | uuid FK → channels | |
+| delivery_status | text default 'completed' | completed/cancelled/partial |
 | invoice_number | text | |
-| customer_ref | text | |
 | entered_by | text | |
-| import_log_id | uuid FK → import_logs | |
 | created_at | timestamptz | |
 
 ## delivery_items
 | Field | Type | Notes |
 |---|---|---|
 | id | uuid PK | |
-| user_id | uuid | |
-| delivery_id | uuid FK → deliveries | |
-| product_id | uuid FK → products | |
-| units_delivered | numeric not null | individual units, not cartons |
-| source_row_id | text | preferred upsert key |
-| line_number | int | fallback upsert key |
-| import_log_id | uuid FK → import_logs | |
+| user_id | uuid nullable | |
+| delivery_id | uuid FK → deliveries not null | |
+| product_id | uuid FK → products not null | |
+| units_delivered | numeric ≥ 0 not null | individual units, not cartons |
+| source_row_id | text unique | primary upsert key |
+| source_line_number | integer | fallback key component |
+| last_modified_date | date | |
+| import_timestamp | timestamptz | |
+| validation_status | text default 'valid' | |
 | created_at | timestamptz | |
 
 ## import_logs
 | Field | Type | Notes |
 |---|---|---|
 | id | uuid PK | |
-| user_id | uuid | |
-| filename | text | |
-| imported_at | timestamptz | |
-| rows_processed | int | |
-| rows_inserted | int | |
-| rows_updated | int | |
-| rows_rejected | int | |
-| status | text | success/partial/failed |
+| user_id | uuid nullable | |
+| file_name | text | |
+| import_status | text | pending/success/partial/failed |
+| rows_processed | integer | |
+| rows_inserted | integer | |
+| rows_updated | integer | |
+| rows_rejected | integer | |
+| rows_skipped | integer | |
+| warnings | integer | |
+| completed_at | timestamptz | |
+| notes | text | |
 | created_at | timestamptz | |
 
 ## import_exceptions
 | Field | Type | Notes |
 |---|---|---|
 | id | uuid PK | |
-| user_id | uuid | |
+| user_id | uuid nullable | |
 | import_log_id | uuid FK → import_logs | |
 | source_row_id | text | |
-| raw_data | jsonb | full row as parsed |
-| error_type | text | validation rule name |
-| error_detail | text | human-readable message |
+| source_line_number | integer | |
+| raw_delivery_ref | text | |
+| raw_store_code | text | |
+| raw_product_code | text | |
+| raw_delivery_date | text | |
+| raw_units | text | |
+| error_type | text not null | e.g. UNKNOWN_STORE |
+| error_message | text not null | |
+| severity | text default 'error' | error/warning |
 | created_at | timestamptz | |
 
-## Relationships
-- channel 1→N chains 1→N stores 1→N deliveries 1→N delivery_items N←1 products
-- deliveries N←1 orders (optional)
-- import_logs 1→N deliveries, 1→N delivery_items, 1→N import_exceptions
+## audit_logs
+| Field | Type | Notes |
+|---|---|---|
+| id | uuid PK | |
+| user_id | uuid nullable | |
+| action | text not null | e.g. IMPORT, UPSERT, DELETE |
+| table_name | text not null | |
+| record_id | uuid | |
+| old_values | jsonb | |
+| new_values | jsonb | |
+| ip_address | text | |
+| created_at | timestamptz | |
 
 ## RLS
-All tables: RLS enabled. v1 permissive policies (select/all using true). Lock-down sprint replaces with `auth.uid() = user_id`.
+All tables: permissive v1 policies (select + all for everyone). 
+Lock-down sprint: replace with `auth.uid() = user_id` policies; role checks via a `profiles` table.
 
-## AI Fields
-No AI-generated fields in v1. Future demand-score fields will carry `value`, `source`, `confidence numeric`, `review_status text default 'unreviewed'`.
+## Key Relationships
+`channel` 1→N `chain` 1→N `store` 1→N `deliveries` 1→N `delivery_items` N→1 `product`

@@ -1,41 +1,45 @@
 # Intelligence Layer
 
-## v1 — Rule-Based Only
-All metrics are deterministic SQL aggregations. No ML in v1.
+## Messy Inputs
+- Spreadsheet store names drift ("AEON Mid Valley" vs "Aeon MidValley") → authoritative `store_code` is the match key
+- Product names abbreviated inconsistently → `product_code` / SKU is the match key
+- Carton quantities entered instead of units → validation rejects non-numeric; warning if units suspiciously round (e.g. multiples of 24)
+- Missing delivery ref → hard block
 
-## Messy Inputs Handled
-- Store names that drift from master data → warning, not block (code is authoritative)
-- Product names that drift → same warning
-- Same product appearing multiple times in one delivery → summed units, one delivery counted
-- Deleted spreadsheet rows → flagged for review, not auto-deleted
-
-## Computed Fields (import time)
+## Auto-Structure on Import (server-side, rule-based)
 ```json
 {
+  "source_row_id": "ROW-2026-07-0042",
+  "resolved_store_id": "uuid",
+  "resolved_product_id": "uuid",
+  "reporting_week": 2,
   "delivery_month": 7,
   "delivery_year": 2026,
-  "reporting_week": 2,
-  "validation_status": "valid"
+  "validation_status": "valid",
+  "warnings": ["store_name_mismatch"]
 }
 ```
-Week band rule: day 1–7 → W1, 8–14 → W2, 15–21 → W3, 22–28 → W4, 29+ → W5.
 
-## Events to Track
-- Row imported (valid/rejected)
-- Delivery upserted (new/updated)
-- Filter applied on dashboard
-- Export triggered
-- Exception acknowledged
+## Events Tracked
+- Row imported (valid / rejected / skipped)
+- Delivery item upserted
+- Import log created
+- Exception flagged
+- Export generated
 
-## Scoring (Later)
-- Delivery frequency score per store (deliveries ÷ weeks active)
-- Volume trend: current month vs prior month per product/store
-- Low-activity flag: store with zero deliveries in current week
+## Scoring Rules (v1 — rule-based, no ML)
+- **Store delivery frequency score** = deliveries in period ÷ weeks in period (shows cadence)
+- **Product concentration** = units to top store ÷ total units for product (flags dependency)
+- **Week-on-week delta** = (this week units − last week units) ÷ last week units × 100
 
-## Ranking (Later)
-- Highest-volume chain, store, product surfaced on summary cards
-- Declining-volume products flagged for management review
+All scores are calculated in SQL at query time; no stored AI fields in v1.
+
+## What Gets Ranked
+- Chains by total units (descending)
+- Stores by delivery frequency
+- Products by units delivered
+- Weeks by units for trend display
 
 ## v1 vs Later
-**v1:** week-band calc, duplicate detection, name-drift warnings, exception classification.
-**Later:** trend scoring, low-stock flags, reorder quantity suggestions (rule-based before any ML).
+**v1:** all scoring is deterministic SQL — no AI dependency. 
+**Later:** predicted weekly demand field on `products` table → store as `predicted_units_next_week numeric`, `predicted_units_source text`, `predicted_units_confidence numeric`, `predicted_units_review_status text default 'unreviewed'`.

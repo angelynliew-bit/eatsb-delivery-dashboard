@@ -1,33 +1,41 @@
 # Test Plan
 
-## Success Scenario (manual walkthrough)
-1. Open `/master-data/stores` → confirm seed stores list loads (not empty, not error).
-2. Create a new store; hard-refresh → new store appears.
-3. Open `/import` → upload `test_20rows_2invalid.xlsx`.
-4. Preview: confirm 18 rows shown green, 2 rows shown red with specific error reasons (e.g. "Unknown store code").
-5. Click Commit → success toast → open Import History → find log row showing processed=20, inserted=18, rejected=2.
-6. Open Import Exceptions → confirm 2 rows with raw data and error detail.
-7. Re-upload same file → log shows updated=18, inserted=0, rejected=2. No duplicate delivery_items created.
-8. Open `/` (dashboard) → select the test month → verify 7 summary cards. Cross-check "Total Units" card against `SELECT SUM(units_delivered) FROM delivery_items` in Supabase SQL editor.
-9. Verify weekly table: W1+W2+W3+W4+W5 total = card total.
-10. Click a chain name → chain drill-down loads; store-by-week cells sum to chain total.
-11. Click a product → product drill-down loads; chain cells sum to product total.
-12. Navigate to a store detail page → delivery-level table lists individual deliveries with correct date and units.
-13. Apply month filter on dashboard → cards update; weekly table updates.
-14. Apply channel filter → chain list narrows correctly.
-15. Click Export CSV on any table → file downloads; row count matches table displayed.
+## v1 Success Scenario (manual)
+**Scenario:** Operations staff imports a July delivery file; management reviews the dashboard.
 
-## Empty State Tests
-- Select a future month with no deliveries → all cards show 0; tables show "No deliveries for this period".
-- New chain with no deliveries → drill-down shows empty state message, not an error.
+### Steps
+1. Open app URL (no login). Confirm July 2026 dashboard loads with seed data summary cards and weekly table.
+2. Navigate to Chain → AEON → AEON Mid Valley. Confirm W1 cell shows 1 delivery / 54 units.
+3. Navigate to Product → 7D Dried Mangoes 100g. Confirm it appears in AEON and 99 Speedmart rows.
+4. Click **Import**. Upload `test_import_valid.xlsx` (18 valid rows, 2 invalid rows).
+5. Confirm preview table shows first 10 rows before import runs.
+6. Click **Confirm Import**. Confirm result: 18 inserted, 0 updated, 2 rejected, 0 skipped.
+7. Open Import Exceptions. Confirm 2 rows listed with correct `error_type` (e.g. UNKNOWN_STORE, MISSING_DELIVERY_REF).
+8. Dashboard summary cards reflect updated totals.
+9. Re-upload same file. Confirm result: 0 inserted, 0 updated, 18 skipped.
+10. Apply filter: Week 2, channel Supermarket. Confirm tables show only W2 supermarket data.
+11. Click Export on filtered chain breakdown table. Confirm CSV downloads with correct columns and row count.
+12. Open Import History. Confirm two import log entries with correct counts.
 
-## Error State Tests
-- Upload a file with wrong columns → API returns validation error; preview shows 0 valid rows and a clear top-level error message.
-- Upload a file where all delivery references are missing → all rows rejected; import_log status = 'failed'.
-- Disconnect network mid-commit → page shows error toast; no partial write (API route is transactional).
+### Pass Criteria
+- All 12 steps complete without browser errors
+- Database row counts match expected values after each step
+- No duplicate delivery items after re-upload
+- Weekly cell values match counting rules (distinct delivery_ref for counts; sum for units)
 
-## Counting Rule Tests
-- Delivery DO-1008 with 3 products → store-level count = 1 delivery, 54 units.
-- Same product in DO-1008 twice → counts as 1 product delivery, units summed.
-- Re-import DO-1008 with changed units → delivery_item updated, not duplicated.
-- Cancelled delivery → excluded from dashboard counts when filter = 'completed'.
+---
+
+## Empty / Error Cases
+
+| Case | Expected behaviour |
+|---|---|
+| Select month with no deliveries | "No deliveries for this month" message on every table; cards show 0 |
+| Upload file with all invalid rows | 0 inserted; all rows in exceptions; import_status = 'failed' |
+| Upload file > 10 MB | Client rejects before upload; error message shown |
+| Upload file missing required columns (no delivery_ref column) | Server returns structured error listing missing columns; no import_log created |
+| Network error mid-import | Partial rows not committed; import_log status = 'failed'; existing data unchanged |
+| Filter chain with no deliveries in selected month | Store table shows empty state; not a blank white page |
+| Unknown store code in spreadsheet | Row rejected with error_type = UNKNOWN_STORE; store code shown in exception detail |
+| Negative units_delivered in spreadsheet | Row rejected with error_type = INVALID_UNITS |
+| Same product twice in one delivery (two source rows) | One product delivery counted; units summed |
+| Cancelled delivery | Excluded from default dashboard (completed filter); visible when status filter = all |

@@ -1,45 +1,40 @@
 # Agentic Layer
 
-## v1 Scope
-No autonomous agents in v1. All actions are user-initiated.
+## v1 — No autonomous agents. All actions are human-initiated.
 
-## Action Risk Levels
+## Action Risk Classification
 
-### Low — Auto-execute
-- Parse uploaded spreadsheet and produce preview (no DB write)
-- Classify validation errors and assign error_type
-- Compute week band and reporting period fields
-- Generate CSV export from filtered query
+### Low risk — auto-execute on confirmed import
+- Parse uploaded file and return preview table
+- Validate rows against master data
+- Calculate `reporting_week`, `delivery_month`, `delivery_year`
+- Write `import_log` row
+- Write `import_exceptions` rows
 
-### Medium — Light approval (user confirms before execute)
-- Commit import: upsert delivery_items and deliveries from previewed rows
-- Mark import_exception as acknowledged
-- Update a master data record (store, product, chain)
+### Medium risk — user clicks Confirm after preview
+- Upsert delivery_items (insert / update existing rows)
+- Flag cancelled rows (set `delivery_status = 'cancelled'`)
+*Approval flow: preview shown → user reviews → user clicks **Confirm Import** → upsert executes → result summary shown.*
 
-### High — Always requires explicit approval
-- Bulk re-import an entire month (overwrites existing records)
-- Mark a delivery as cancelled (changes status, affects counts)
+### High risk — explicit user action required
+- Bulk-delete delivery records flagged as deleted in source spreadsheet
+*Flow: system flags rows as `deleted_pending_review`; admin reviews list; admin clicks **Confirm Delete** per batch.*
 
-### Critical — Human only
-- Delete a delivery or delivery_item permanently
-- Delete a master data record (store/product/chain)
-- Any bulk delete operation
+### Critical — human only, no automation
+- Permanent deletion of historical delivery records
+- Changes to master store or product codes
+- Role changes for other users
+*These actions require a named administrator and are logged in `audit_logs` with `old_values` and `new_values`.*
 
-## Named Tools (Later Sprints)
-- `validate_spreadsheet_row(row)` → returns error list
-- `upsert_delivery_item(row)` → idempotent upsert
-- `generate_export(filters)` → returns CSV stream
-- `flag_exception(import_log_id, row_id, reason)` → writes import_exceptions
+## Named Tools (v1)
+- `parse_spreadsheet(file)` → row array
+- `validate_rows(rows)` → {valid[], rejected[], warnings[]}
+- `upsert_delivery_items(valid_rows, import_log_id)` → counts
+- `export_csv(query_params)` → streamed CSV
 
 ## Audit Log Fields
-| Field | Value |
-|---|---|
-| actor_user_id | who triggered |
-| action | e.g. import_committed |
-| object_type | delivery / delivery_item / import_log |
-| object_id | affected row id |
-| before_state | jsonb snapshot |
-| after_state | jsonb snapshot |
-| timestamp | timestamptz |
+`action | table_name | record_id | old_values (jsonb) | new_values (jsonb) | user_id | ip_address | created_at`
 
-Every medium/high/critical action writes an audit row before and after execution.
+## Later
+- Scheduled daily import trigger (Mon–Sat) calling `parse_spreadsheet` + `upsert_delivery_items` automatically
+- Low-stock alert agent: reads stock cover < threshold → drafts reorder suggestion → Operations approves before any PO is raised
