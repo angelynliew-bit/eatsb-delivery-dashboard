@@ -1,0 +1,21 @@
+delivery_ref,delivery_date,order_number,chain_code,chain_name,store_code,store_name,location,state,product_code,product_name,brand,units_delivered,delivery_status,source_row_id,last_modified_date
+DO-9001,2026-07-22,SO-9001,CHN-AEON,AEON,STR-AEON-TAIPAN,AEON Taipan,"USJ, Subang Jaya",Selangor,SKU-7D-MANGO-100,7D Dried Mangoes 100g,7D,24,completed,PRD-TEST-R001,2026-07-22
+DO-9001,2026-07-22,SO-9001,CHN-AEON,AEON,STR-AEON-TAIPAN,AEON Taipan,"USJ, Subang Jaya",Selangor,SKU-SINA-56,Sina Original 56g,Sina,18,completed,PRD-TEST-R002,2026-07-22
+DO-9002,2026-07-22,SO-9002,CHN-AEON,AEON,STR-AEON-WANGSA,AEON Wangsa Maju,Wangsa Maju,Kuala Lumpur,SKU-7D-THIN-80,7D Mango Thins 80g,7D,30,completed,PRD-TEST-R003,2026-07-22
+DO-9003,2026-07-23,SO-9003,CHN-MYDIN,Mydin,STR-MYDIN-USJ,Mydin USJ,"USJ, Subang Jaya",Selangor,SKU-SINA-SPICY-56,Sina Spicy 56g,Sina,48,completed,PRD-TEST-R004,2026-07-23
+DO-9003,2026-07-23,SO-9003,CHN-MYDIN,Mydin,STR-MYDIN-USJ,Mydin USJ,"USJ, Subang Jaya",Selangor,SKU-SINA-56,Sina Original 56g,Sina,24,completed,PRD-TEST-R005,2026-07-23
+DO-9004,2026-07-24,SO-9004,CHN-99SPD,99 Speedmart,STR-99-PJ,99 Speedmart PJ,Petaling Jaya,Selangor,SKU-SINA-SPICY-56,Sina Spicy 56g,Sina,36,completed,PRD-TEST-R006,2026-07-24
+DO-9005,2026-07-24,SO-9005,CHN-99SPD,99 Speedmart,STR-99-PJ,99 Speedmart PJ,Petaling Jaya,Selangor,SKU-7D-MANGO-100,7D Dried Mangoes 100g,7D,24,completed,PRD-TEST-R007,2026-07-24
+DO-9005,2026-07-24,SO-9005,CHN-99SPD,99 Speedmart,STR-99-PJ,99 Speedmart PJ,Petaling Jaya,Selangor,SKU-SINA-56,Sina Original 56g,Sina,12,completed,PRD-TEST-R008,2026-07-24
+DO-9006,2026-07-25,SO-9006,CHN-AEON,AEON,STR-AEON-WANGSA,AEON Wangsa Maju,Wangsa Maju,Kuala Lumpur,SKU-7D-THIN-80,7D Mango Thins 80g,7D,42,completed,PRD-TEST-R009,2026-07-25
+DO-9007,2026-07-25,SO-9007,CHN-AEON,AEON,STR-AEON-TAIPAN,AEON Taipan,"USJ, Subang Jaya",Selangor,SKU-SINA-SPICY-56,Sina Spicy 56g,Sina,36,completed,PRD-TEST-R010,2026-07-25
+DO-9008,2026-07-26,SO-9008,CHN-MYDIN,Mydin,STR-MYDIN-USJ,Mydin USJ,"USJ, Subang Jaya",Selangor,SKU-SINA-56,Sina Original 56g,Sina,30,completed,PRD-TEST-R011,2026-07-26
+DO-9009,2026-07-26,SO-9009,CHN-99SPD,99 Speedmart,STR-99-PJ,99 Speedmart PJ,Petaling Jaya,Selangor,SKU-7D-MANGO-100,7D Dried Mangoes 100g,7D,24,completed,PRD-TEST-R012,2026-07-26
+DO-9010,2026-07-27,SO-9010,CHN-AEON,AEON,STR-AEON-WANGSA,AEON Wangsa Maju,Wangsa Maju,Kuala Lumpur,SKU-SINA-56,Sina Original 56g,Sina,18,completed,PRD-TEST-R013,2026-07-27
+DO-9011,2026-07-29,SO-9011,CHN-AEON,AEON,STR-AEON-TAIPAN,AEON Taipan,"USJ, Subang Jaya",Selangor,SKU-SINA-SPICY-56,Sina Spicy 56g,Sina,36,completed,PRD-TEST-R014,2026-07-29
+DO-9012,2026-07-29,SO-9012,CHN-MYDIN,Mydin,STR-MYDIN-USJ,Mydin USJ,"USJ, Subang Jaya",Selangor,SKU-7D-MANGO-100,7D Dried Mangoes 100g,7D,24,completed,PRD-TEST-R015,2026-07-29
+DO-9013,2026-07-30,SO-9013,CHN-99SPD,99 Speedmart,STR-99-PJ,99 Speedmart PJ,Petaling Jaya,Selangor,SKU-7D-THIN-80,7D Mango Thins 80g,7D,30,completed,PRD-TEST-R016,2026-07-30
+DO-9014,2026-07-30,SO-9014,CHN-AEON,AEON,STR-AEON-WANGSA,AEON Wangsa Maju,Wangsa Maju,Kuala Lumpur,SKU-SINA-SPICY-56,Sina Spicy 56g,Sina,48,completed,PRD-TEST-R017,2026-07-30
+DO-9015,2026-07-31,SO-9015,CHN-AEON,AEON,STR-AEON-TAIPAN,AEON Taipan,"USJ, Subang Jaya",Selangor,SKU-SINA-56,Sina Original 56g,Sina,24,completed,PRD-TEST-R018,2026-07-31
+DO-9016,2026-07-31,SO-9016,CHN-AEON,AEON,STR-UNKNOWN,Unknown Store,Unknown,Kuala Lumpur,SKU-SINA-56,Sina Original 56g,Sina,24,completed,PRD-TEST-R019,2026-07-31
+,2026-07-31,SO-9017,CHN-AEON,AEON,STR-AEON-TAIPAN,AEON Taipan,"USJ, Subang Jaya",Selangor,SKU-7D-MANGO-100,7D Dried Mangoes 100g,7D,24,completed,PRD-TEST-R020,2026-07-31
