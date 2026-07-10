@@ -1,13 +1,19 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Work+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg: #f5f7f9;
-  --panel: #ffffff;
-  --line: #d9e1e8;
-  --text: #18212b;
-  --muted: #627083;
-  --accent: #0f766e;
-  --accent-dark: #115e59;
+  --bg: #F3EEDF;
+  --panel: #FBF7EC;
+  --panel-solid: #FFFDF7;
+  --line: #E4DAC0;
+  --text: #1E2B1E;
+  --muted: #5B6B52;
+  --accent: #3F6B3B;     /* Orchard Green */
+  --accent-dark: #2E4E2B;
+  --persimmon: #D9642A;
+  --gold: #E2A730;
+  --forest: #1E2B1E;     /* Deep Forest Ink */
+  --cream: #F8F4E8;
   --warn: #a16207;
 }
 
@@ -19,7 +25,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Work Sans', Arial, Helvetica, sans-serif;
 }
 
 button,
@@ -39,39 +45,69 @@ select {
   justify-content: space-between;
   align-items: flex-end;
   gap: 24px;
-  padding: 8px 0 20px;
+  padding: 30px 34px;
+  margin-bottom: 20px;
+  background: var(--forest);
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(30,43,30,0.18);
 }
 
 .eyebrow {
-  margin: 0 0 6px;
-  color: var(--accent);
+  margin: 0 0 10px;
+  color: var(--gold);
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.16em;
 }
 
 h1,
 h2 {
   margin: 0;
   letter-spacing: 0;
+  font-family: 'Lora', serif;
+  font-weight: 600;
 }
 
 h1 {
-  font-size: 30px;
+  font-size: 34px;
   line-height: 1.15;
+  color: var(--cream);
 }
 
 h2 {
-  font-size: 18px;
+  font-size: 19px;
   margin-bottom: 12px;
+  color: var(--text);
+  position: relative;
+  padding-top: 14px;
 }
 
-.status-pill,
+/* accent bar above every section header */
+h2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 3px;
+  background: var(--persimmon);
+}
+
+.status-pill {
+  background: rgba(248,244,232,0.08);
+  border: 1px solid rgba(248,244,232,0.28);
+  border-radius: 999px;
+  padding: 10px 18px;
+  color: #F0C878;
+  white-space: nowrap;
+}
+
 .notice,
 .empty {
   border: 1px solid var(--line);
   background: var(--panel);
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 10px 12px;
   color: var(--muted);
 }
@@ -95,17 +131,19 @@ h2 {
 .filters {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 14px;
+  border-radius: 14px;
+  padding: 16px 18px;
 }
 
 label {
   display: grid;
-  gap: 5px;
+  gap: 6px;
   min-width: 138px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .search {
@@ -117,7 +155,7 @@ input,
 select {
   width: 100%;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 8px;
   background: #fff;
   color: var(--text);
   min-height: 38px;
@@ -125,35 +163,49 @@ select {
 }
 
 .tabs {
-  margin: 16px 0;
+  margin: 16px 0 20px;
 }
 
 button,
 .export-row a,
 .sample-link {
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--panel);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-solid);
   color: var(--text);
   cursor: pointer;
   min-height: 38px;
-  padding: 8px 12px;
+  padding: 10px 20px;
   text-decoration: none;
+  font-weight: 600;
+}
+
+.export-row a,
+.sample-link {
+  border-color: var(--persimmon);
+  color: var(--persimmon);
+  padding: 7px 14px;
+  font-size: 12px;
+  min-height: unset;
 }
 
 button:hover,
 .export-row a:hover,
-.sample-link:hover,
+.sample-link:hover {
+  filter: brightness(0.95);
+}
+
 button.active {
+  background: var(--accent);
   border-color: var(--accent);
-  color: var(--accent-dark);
+  color: var(--cream);
 }
 
 button[type="submit"],
 .import-box button:last-child {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+  background: var(--persimmon);
+  border-color: var(--persimmon);
+  color: var(--cream);
 }
 
 button:disabled {
@@ -163,13 +215,13 @@ button:disabled {
 
 .view {
   display: grid;
-  gap: 18px;
+  gap: 20px;
 }
 
 .cards {
   display: grid;
   grid-template-columns: repeat(6, minmax(140px, 1fr));
-  gap: 10px;
+  gap: 12px;
 }
 
 .cards.compact {
@@ -179,27 +231,35 @@ button:disabled {
 .metric {
   background: var(--panel);
   border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 14px;
+  border-top: 4px solid var(--accent);
+  border-radius: 12px;
+  padding: 16px;
 }
+
+.metric:nth-child(3n+2) { border-top-color: var(--persimmon); }
+.metric:nth-child(3n)   { border-top-color: var(--gold); }
 
 .metric span {
   display: block;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
 }
 
 .metric strong {
-  font-size: 25px;
+  font-family: 'Lora', serif;
+  font-size: 27px;
   line-height: 1;
+  color: var(--text);
 }
 
 .grid-two {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  gap: 20px;
 }
 
 section {
@@ -207,9 +267,9 @@ section {
 }
 
 .table-wrap {
-  background: var(--panel);
+  background: var(--panel-solid);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: auto;
 }
 
@@ -222,17 +282,23 @@ table {
 
 th,
 td {
-  border-bottom: 1px solid var(--line);
-  padding: 10px 12px;
+  border-bottom: 1px solid #EEE5CB;
+  padding: 10px 14px;
   text-align: left;
   vertical-align: top;
 }
 
 th {
-  background: #edf3f6;
-  color: #334155;
-  font-size: 12px;
-  font-weight: 800;
+  background: var(--forest);
+  color: var(--bg);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+tr:nth-child(even) td {
+  background: #F7F1E2;
 }
 
 tr:last-child td {
@@ -245,9 +311,9 @@ tr:last-child td {
 
 .import-box {
   background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 14px;
+  border: 2px dashed var(--persimmon);
+  border-radius: 14px;
+  padding: 22px;
 }
 
 .import-box label {
