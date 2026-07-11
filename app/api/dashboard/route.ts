@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/auth/server";
+import { createClient } from "@/lib/supabase/server";
 import { fetchDeliveryRows, parseMonthParam } from "@/lib/delivery/server";
 
 export const dynamic = "force-dynamic";
@@ -68,7 +69,8 @@ export async function GET(request: NextRequest) {
       search: (params.get("search") ?? "").trim().toLowerCase(),
     };
 
-    const rows = await fetchDeliveryRows();
+    const supabase = await createClient();
+    const rows = await fetchDeliveryRows(supabase);
     const masters = {
       channels: new Map<string, string>(),
       chains: new Map<string, { name: string; channel: string }>(),

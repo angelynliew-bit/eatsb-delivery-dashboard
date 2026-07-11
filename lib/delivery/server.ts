@@ -62,8 +62,8 @@ export function normalizeStatus(value: unknown): DeliveryStatus | null {
   return null;
 }
 
-export async function fetchDeliveryRows() {
-  const supabase = supabaseServer();
+export async function fetchDeliveryRows(client?: ReturnType<typeof supabaseServer>) {
+  const supabase = client ?? supabaseServer();
   const [deliveries, items, channels, chains, stores, products] = await Promise.all([
     supabase.from("deliveries").select("*").order("delivery_date", { ascending: false }),
     supabase.from("delivery_items").select("*"),

@@ -6,6 +6,7 @@ export type AuthContext = {
   user: {
     id: string;
     email: string | undefined;
+    name: string | undefined;
   };
   role: UserRole;
   permissions: ReturnType<typeof permissionsForRole>;
@@ -25,7 +26,7 @@ export async function getAuthContext(): Promise<AuthContext | null> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, full_name")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -37,6 +38,7 @@ export async function getAuthContext(): Promise<AuthContext | null> {
     user: {
       id: user.id,
       email: user.email,
+      name: profile?.full_name ?? user.user_metadata?.full_name ?? user.user_metadata?.name,
     },
     role,
     permissions: permissionsForRole(role),

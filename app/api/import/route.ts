@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 import { requirePermission } from "@/lib/auth/server";
-import { normalizeStatus, reportingWeek, supabaseServer } from "@/lib/delivery/server";
+import { normalizeStatus, reportingWeek } from "@/lib/delivery/server";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -93,8 +94,7 @@ async function rowsFromRequest(request: NextRequest) {
   return { fileName: file.name, rows: rawRows.map(normalizeRow) };
 }
 
-async function loadMasters() {
-  const supabase = supabaseServer();
+async function loadMasters(supabase: Awaited<ReturnType<typeof createClient>>) {
   const [{ data: stores, error: storeError }, { data: chains, error: chainError }, { data: products, error: productError }] = await Promise.all([
     supabase.from("stores").select("*"),
     supabase.from("chains").select("*"),
@@ -130,9 +130,9 @@ export async function POST(request: NextRequest) {
     if (response) return response;
 
     const action = request.nextUrl.searchParams.get("action") ?? "preview";
-    const supabase = supabaseServer();
+    const supabase = await createClient();
     const { fileName, rows } = await rowsFromRequest(request);
-    const masters = await loadMasters();
+    const masters = await loadMasters(supabase);
 
     const previewRows = rows.map((row) => {
       const error = validationError(row, masters);
