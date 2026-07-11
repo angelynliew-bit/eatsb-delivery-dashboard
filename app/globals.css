@@ -52,6 +52,14 @@ select {
   box-shadow: 0 8px 24px rgba(30,43,30,0.18);
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .eyebrow {
   margin: 0 0 10px;
   color: var(--gold);
@@ -213,6 +221,10 @@ button:disabled {
   opacity: 0.5;
 }
 
+.secondary-button {
+  width: 100%;
+}
+
 .view {
   display: grid;
   gap: 20px;
@@ -321,6 +333,69 @@ tr:last-child td {
   flex: 1;
 }
 
+.login-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.login-panel {
+  width: min(980px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.login-copy,
+.login-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.login-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.login-copy p:not(.eyebrow) {
+  max-width: 560px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.login-card {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.auth-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.login-form {
+  display: grid;
+  gap: 12px;
+}
+
+.login-form label {
+  min-width: 0;
+}
+
+.login-form button[type="submit"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
 @media (max-width: 1000px) {
   .topbar {
     align-items: stretch;
@@ -329,7 +404,8 @@ tr:last-child td {
 
   .cards,
   .cards.compact,
-  .grid-two {
+  .grid-two,
+  .login-panel {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -345,7 +421,8 @@ tr:last-child td {
 
   .cards,
   .cards.compact,
-  .grid-two {
+  .grid-two,
+  .login-panel {
     grid-template-columns: 1fr;
   }
 }

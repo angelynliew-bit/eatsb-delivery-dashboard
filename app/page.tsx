@@ -173,7 +173,10 @@ export default function Home() {
           <p className="eyebrow">East Asian Traders</p>
           <h1>Order and Delivery Tracking Dashboard</h1>
         </div>
-        <div className="status-pill">{dashboard?.summary?.lastUpdated ? `Last updated ${new Date(dashboard.summary.lastUpdated).toLocaleString()}` : "Seed data loaded"}</div>
+        <div className="topbar-actions">
+          <div className="status-pill">{dashboard?.summary?.lastUpdated ? `Last updated ${new Date(dashboard.summary.lastUpdated).toLocaleString()}` : "Seed data loaded"}</div>
+          <a className="sample-link" href="/login">Login</a>
+        </div>
       </header>
 
       <section className="filters" aria-label="Dashboard filters">
