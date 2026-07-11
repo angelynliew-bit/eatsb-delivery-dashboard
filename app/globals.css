@@ -556,7 +556,8 @@ tr:last-child td {
 
   .mobile-menu-button {
     display: grid;
-    align-content: center;
+    place-content: center;
+    justify-items: center;
     gap: 4px;
     position: fixed;
     top: 16px;
@@ -566,6 +567,7 @@ tr:last-child td {
     min-height: 42px;
     padding: 0;
     background: var(--panel-solid);
+    line-height: 1;
   }
 
   .sidebar {
