@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { RolePermissions } from "@/lib/auth/roles";
 import { navigationItems } from "@/lib/navigation";
@@ -20,6 +20,8 @@ export default function SideNavigation({ email, name, role, permissions }: SideN
   const supabase = useMemo(() => createClient(), []);
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     setCollapsed(window.localStorage.getItem("eatsb-sidebar-collapsed") === "true");
@@ -33,8 +35,52 @@ export default function SideNavigation({ email, name, role, permissions }: SideN
     });
   }
 
+  function closeDrawer() {
+    setDrawerOpen(false);
+    window.setTimeout(() => hamburgerRef.current?.focus(), 0);
+  }
+
+  function handleDrawerKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeDrawer();
+      return;
+    }
+
+    if (event.key !== "Tab") return;
+
+    const focusable = Array.from(
+      drawerRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ) ?? [],
+    );
+
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+
+    const firstFocusable = drawerRef.current?.querySelector<HTMLElement>(
+      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    firstFocusable?.focus();
+  }, [drawerOpen]);
+
   async function signOut() {
     await supabase.auth.signOut();
+    setDrawerOpen(false);
     router.replace("/login");
     router.refresh();
   }
@@ -43,11 +89,29 @@ export default function SideNavigation({ email, name, role, permissions }: SideN
 
   return (
     <>
-      <button className="mobile-menu-button" type="button" onClick={() => setDrawerOpen(true)}>
-        Menu
+      <button
+        ref={hamburgerRef}
+        className="mobile-menu-button"
+        type="button"
+        aria-label="Open navigation"
+        aria-controls="app-navigation-drawer"
+        aria-expanded={drawerOpen}
+        onClick={() => setDrawerOpen(true)}
+      >
+        <span aria-hidden="true" />
+        <span aria-hidden="true" />
+        <span aria-hidden="true" />
       </button>
-      {drawerOpen && <button className="sidebar-scrim" type="button" aria-label="Close menu" onClick={() => setDrawerOpen(false)} />}
-      <aside className={`sidebar ${collapsed ? "collapsed" : ""} ${drawerOpen ? "drawer-open" : ""}`}>
+      {drawerOpen && <button className="sidebar-scrim" type="button" aria-label="Close navigation" onClick={closeDrawer} />}
+      <aside
+        ref={drawerRef}
+        id="app-navigation-drawer"
+        className={`sidebar ${collapsed ? "collapsed" : ""} ${drawerOpen ? "drawer-open" : ""}`}
+        aria-label="Application navigation"
+        aria-modal={drawerOpen}
+        role={drawerOpen ? "dialog" : undefined}
+        onKeyDown={handleDrawerKeyDown}
+      >
         <div className="sidebar-header">
           <div>
             <p className="eyebrow">East Asian Traders</p>
@@ -55,6 +119,9 @@ export default function SideNavigation({ email, name, role, permissions }: SideN
           </div>
           <button className="collapse-button" type="button" onClick={toggleCollapsed} aria-label="Toggle sidebar">
             {collapsed ? ">" : "<"}
+          </button>
+          <button className="drawer-close-button" type="button" onClick={closeDrawer} aria-label="Close navigation">
+            Close
           </button>
         </div>
 
