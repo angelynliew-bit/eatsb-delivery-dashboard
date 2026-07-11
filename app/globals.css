@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Work+Sans:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
 
 :root {
   --bg: #F3EEDF;
@@ -123,6 +123,17 @@ h2::before {
 .notice {
   margin: 14px 0;
   color: var(--warn);
+}
+
+.muted-text,
+.reset-link {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.reset-link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .filters,

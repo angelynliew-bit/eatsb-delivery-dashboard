@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requirePermission } from "@/lib/auth/server";
 import { fetchDeliveryRows, parseMonthParam } from "@/lib/delivery/server";
 
 export const dynamic = "force-dynamic";
@@ -50,6 +51,9 @@ function finalizeBuckets(map: Map<string, any>) {
 
 export async function GET(request: NextRequest) {
   try {
+    const { response } = await requirePermission("canViewDashboard");
+    if (response) return response;
+
     const params = request.nextUrl.searchParams;
     const parsedMonth = parseMonthParam(params.get("month"));
     const filters: Filters = {

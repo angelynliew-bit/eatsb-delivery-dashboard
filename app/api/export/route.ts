@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requirePermission } from "@/lib/auth/server";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,9 @@ function csvEscape(value: unknown) {
 }
 
 export async function GET(request: NextRequest) {
+  const { response: authResponse } = await requirePermission("canExport");
+  if (authResponse) return authResponse;
+
   const table = request.nextUrl.searchParams.get("table") ?? "chains";
   if (!allowed.has(table)) {
     return NextResponse.json({ error: "Unknown export table." }, { status: 400 });
@@ -20,8 +24,13 @@ export async function GET(request: NextRequest) {
     if (key !== "table") url.searchParams.set(key, value);
   });
 
-  const response = await fetch(url, { cache: "no-store" });
-  const data = await response.json();
+  const dashboardResponse = await fetch(url, {
+    cache: "no-store",
+    headers: {
+      cookie: request.headers.get("cookie") ?? "",
+    },
+  });
+  const data = await dashboardResponse.json();
   const rows = data[table] ?? [];
   const headers = rows.length ? Object.keys(rows[0]).filter((key) => key !== "weeks") : ["message"];
   const lines = [headers.join(",")];

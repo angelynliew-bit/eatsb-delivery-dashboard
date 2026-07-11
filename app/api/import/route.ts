@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
+import { requirePermission } from "@/lib/auth/server";
 import { normalizeStatus, reportingWeek, supabaseServer } from "@/lib/delivery/server";
 
 export const dynamic = "force-dynamic";
@@ -125,6 +126,9 @@ function validationError(row: any, masters: Awaited<ReturnType<typeof loadMaster
 
 export async function POST(request: NextRequest) {
   try {
+    const { response } = await requirePermission("canImport");
+    if (response) return response;
+
     const action = request.nextUrl.searchParams.get("action") ?? "preview";
     const supabase = supabaseServer();
     const { fileName, rows } = await rowsFromRequest(request);

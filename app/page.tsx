@@ -1,10 +1,17 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { type RolePermissions } from "@/lib/auth/roles";
 
 type Dashboard = any;
+type Me = {
+  user: { email?: string };
+  role: string;
+  permissions: RolePermissions;
+};
 
-const tabs = ["Overview", "Import", "Drill-down", "Records", "History", "Master Data"];
 const exportTables = ["chains", "stores", "products", "deliveryRecords"];
 
 function formatNumber(value: number) {
@@ -68,7 +75,10 @@ function Matrix({ rows, nameKey = "name" }: { rows: any[]; nameKey?: string }) {
 }
 
 export default function Home() {
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
   const [activeTab, setActiveTab] = useState("Overview");
+  const [me, setMe] = useState<Me | null>(null);
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [history, setHistory] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -89,6 +99,13 @@ export default function Home() {
   });
 
   const query = useMemo(() => new URLSearchParams(filters).toString(), [filters]);
+  const tabs = useMemo(() => {
+    const available = ["Overview", "Drill-down", "Records"];
+    if (me?.permissions.canImport) available.splice(1, 0, "Import");
+    if (me?.permissions.canViewHistory) available.push("History");
+    if (me?.permissions.canViewMasterData) available.push("Master Data");
+    return available;
+  }, [me]);
 
   async function loadDashboard() {
     setLoading(true);
@@ -96,6 +113,10 @@ export default function Home() {
     try {
       const response = await fetch(`/api/dashboard?${query}`, { cache: "no-store" });
       const data = await response.json();
+      if (response.status === 401) {
+        router.replace("/login");
+        return;
+      }
       if (!response.ok) throw new Error(data.error);
       setDashboard(data);
     } catch (error) {
@@ -106,18 +127,40 @@ export default function Home() {
   }
 
   async function loadHistory() {
+    if (!me?.permissions.canViewHistory && !me?.permissions.canViewMasterData) return;
     const response = await fetch("/api/history", { cache: "no-store" });
     const data = await response.json();
     if (response.ok) setHistory(data);
   }
 
   useEffect(() => {
-    loadDashboard();
-  }, [query]);
+    async function loadMe() {
+      const response = await fetch("/api/me", { cache: "no-store" });
+      const data = await response.json();
+      if (response.status === 401) {
+        router.replace("/login");
+        return;
+      }
+      if (response.ok) setMe(data);
+      else setMessage(data.error ?? "Could not load user session.");
+    }
+
+    loadMe();
+  }, [router]);
 
   useEffect(() => {
-    loadHistory();
-  }, []);
+    if (me) loadDashboard();
+  }, [query, me]);
+
+  useEffect(() => {
+    if (me) loadHistory();
+  }, [me]);
+
+  useEffect(() => {
+    if (me && !tabs.includes(activeTab)) {
+      setActiveTab("Overview");
+    }
+  }, [activeTab, me, tabs]);
 
   function setFilter(name: string, value: string) {
     setFilters((current) => ({
@@ -130,6 +173,10 @@ export default function Home() {
   }
 
   async function upload(action: "preview" | "import") {
+    if (!me?.permissions.canImport) {
+      setMessage("Your role does not allow spreadsheet imports.");
+      return;
+    }
     if (!selectedFile) {
       setMessage("Choose a CSV or Excel file first.");
       return;
@@ -150,6 +197,12 @@ export default function Home() {
       await Promise.all([loadDashboard(), loadHistory()]);
     }
     setMessage("");
+  }
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    router.replace("/login");
+    router.refresh();
   }
 
   async function handlePreview(event: FormEvent) {
@@ -174,8 +227,9 @@ export default function Home() {
           <h1>Order and Delivery Tracking Dashboard</h1>
         </div>
         <div className="topbar-actions">
+          {me && <div className="status-pill">{me.user.email ?? "Signed in"} · {me.role}</div>}
           <div className="status-pill">{dashboard?.summary?.lastUpdated ? `Last updated ${new Date(dashboard.summary.lastUpdated).toLocaleString()}` : "Seed data loaded"}</div>
-          <a className="sample-link" href="/login">Login</a>
+          <button type="button" onClick={signOut}>Sign out</button>
         </div>
       </header>
 
@@ -256,7 +310,9 @@ export default function Home() {
           <div className="section-head">
             <h2>Weekly Breakdown</h2>
             <div className="export-row">
-              {exportTables.map((table) => <a key={table} href={`/api/export?table=${table}&${query}`}>Export {table}</a>)}
+              {me?.permissions.canExport
+                ? exportTables.map((table) => <a key={table} href={`/api/export?table=${table}&${query}`}>Export {table}</a>)
+                : <span className="muted-text">Exports are not available for your role.</span>}
             </div>
           </div>
           <DataTable rows={dashboard.weekly} columns={[["Week", (row) => `Week ${row.week}`], ["Deliveries", "deliveries"], ["Units", (row) => formatNumber(row.units)]]} empty="No deliveries for this month." />

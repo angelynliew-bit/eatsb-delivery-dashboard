@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
+import { requirePermission } from "@/lib/auth/server";
 import { supabaseServer } from "@/lib/delivery/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
+    const { response } = await requirePermission("canViewHistory");
+    if (response) return response;
+
     const supabase = supabaseServer();
     const [logs, exceptions, channels, chains, stores, products] = await Promise.all([
       supabase.from("import_logs").select("*").order("created_at", { ascending: false }).limit(50),
